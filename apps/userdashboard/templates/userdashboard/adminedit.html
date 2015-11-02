@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>Profile Edit</title>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+	<style>
+	body{
+		color:black;
+		font-size:16px;
+		font-weight:bold;
+		background-image: url("https://upload.wikimedia.org/wikipedia/en/thumb/1/13/PinkFloydWallCoverOriginalNoText.jpg/220px-PinkFloydWallCoverOriginalNoText.jpg");
+		}
+	</style>
+</head>
+<body>
+<div class="container">
+<a href="/logout">Logout</a>
+<a href="/dashboard">Dashboard</a>
+<br>
+	{% if user.id == request.session.user_id %}
+	Editing Your Profile 
+	{% else %}
+	Editing {{user.first_name}}'s profile</h3>
+	{%endif%}
+	
+	<form action="/users/{{user.id}}/update" method="post">
+		{%csrf_token%}
+		<h5>First Name:
+		<input type="text" name="first_name" value="{{user.first_name}}">
+		</h5>
+		<h5>
+		Last Name:
+		<input type="text" name="last_name" value="{{user.last_name}}">
+		</h5>
+		<h5>
+		Email:
+		<input type="email" name="email" value="{{user.email}}">
+		</h5>
+		<h5>
+		Description:
+		<textarea name="description" id="" cols="30" rows="10" value="{{user.description}}" style="resize:none">{{user.description}}</textarea>	
+		</h5>
+	
+		<h5>
+		{% if current_user.user_level == 9 %}
+		User Level:
+		<select name="user_level" id="">
+			{% if user.user_level == 9 %}
+			<option value="9">Admin</option>
+			<option value="1">Normal</option>
+			{% else %}
+			<option value="1">Normal</option>
+			<option value="9">Admin</option>
+			{%endif %}
+		</select>
+		{%endif%}
+		<br><br>
+		Password: <input type="password" name="password" value="{{user.password}}">
+		<br>
+		Confirm Password: <input type="password" name="confirm_password" value="{{user.password}}">
+		<br><br>
+	<input type="submit" value="Update">
+	</form>
+	</div>
+</body>
+</html>

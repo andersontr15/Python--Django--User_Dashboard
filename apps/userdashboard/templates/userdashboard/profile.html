@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>User Information</title>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+	<style>
+	body{
+		color:black;
+		font-size:16px;
+		font-weight:bold;
+		background-image: url("https://upload.wikimedia.org/wikipedia/en/thumb/1/13/PinkFloydWallCoverOriginalNoText.jpg/220px-PinkFloydWallCoverOriginalNoText.jpg");
+		}
+	</style>
+</head>
+<body>
+<div class="container">
+<a href="/dashboard">Dashboard</a>
+<a href="/logout">Logout</a>
+	{% if user.id == request.session.user_id %}
+		<h3>Your wall</h3>
+		Name: {{user.first_name}}
+	{%else %}
+		<h3>{{user.first_name}}
+	{%endif%}
+	<br>
+	Registered at: {{user.created_at}}
+	<br>
+	User ID: #{{user.id}}
+	<br>
+	Email address: {{user.email}}
+	</h3>
+	<hr>
+	{% if current_user.id != user.id %}
+		<h3><a href="/poke/{{user.id}}"><button>Poke</button></a></h3>
+	{%endif%}
+	<h3>Number of times 
+
+	{% if current_user.id == user.id %}
+		you have been poked: {{poke_count.count}}
+	{%else %}
+	{{user.first_name}} has been poked: {{poke_count.count}}</h3>
+	{%endif%}
+	<hr>
+	{% if current_user.id != user.id %}
+		<h3>Leave A Message for {{user.first_name}}</h3>
+			<form action="/message/{{user.id}}/" method="post">
+				{%csrf_token%}
+				<input type="hidden" name="user_id" value="{{request.session.user_id}}">
+				<input type="text" name="message" placeholder="Your message.." required>
+				<input type="submit" value="Post" class="btn btn-success">
+			</form>
+	{%endif%}
+	<br>
+	<div class="messages">
+		{% for message in messages %}
+			{%if message.sender_id == current_user.id %}
+				You said: {{message.message}} <br>
+			on: {{message.created_at}}
+			{%else %}
+			{{message.sender.first_name}} 
+			said: {{message.message}} <br>
+			on: {{message.created_at}}
+			{%endif%}
+			<br>
+			{% if message.sender_id == current_user.id %}
+			<a href="/delete_message/{{message.id}}">Delete message</a>
+			{%endif%}
+			<form action="/comment/" method="post">
+				{%csrf_token%}
+				<input type="text" name="comment" placeholder="Your comment.." required>
+				<br>
+				<input type="hidden" name="message_id" value="{{message.id}}">
+				<br>
+				<input type="submit" value="Post a comment.." class="btn btn-primary">
+			</form>
+			<hr>
+			{% for comment in comments %}
+				{%if comment.message_id == message.id %}
+					{%if comment.message.sender_id == current_user.id %}
+						You commented: {{comment.comment}}
+				<br>
+				on {{comment.created_at}}
+				<form action="/comment/" method="post">
+				{%csrf_token%}
+				<input type="text" name="comment" placeholder="Your comment.." required>
+				<br>
+				<input type="hidden" name="message_id" value="{{message.id}}">
+				<br>
+				<input type="submit" value="Post a comment.." class="btn btn-primary">
+			</form>
+				{%else%}
+					{{comment.sender.first_name}} commented: {{comment.comment}}
+					<br>
+					on {{comment.created_at}}
+					<br>
+					<form action="/comment/" method="post">
+				{%csrf_token%}
+				<input type="text" name="comment" placeholder="Your comment.." required>
+				<br>
+				<input type="hidden" name="message_id" value="{{message.id}}">
+				<br>
+				<input type="submit" value="Post a comment.." class="btn btn-primary">
+			</form>
+				{%endif%}
+					{%if comment.sender_id == current_user.id %}
+						<a href="/delete_comment/{{comment.id}}">Delete</a>
+					{%endif%}
+				{%endif%}
+			{%endfor%}
+		{%endfor%}
+	</div>
+</div>
+</body>
+</html>

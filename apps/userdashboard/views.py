@@ -7,12 +7,9 @@ from django.utils import timezone
 from datetime import datetime
 
 def index(request):
-	print request.GET
-	print request.method
 	return render(request, 'userdashboard/index.html')
 
 def register(request):
-	print "Registration"
 	user = User.objects.filter(email= request.POST.get('email'), password=request.POST.get('password'))
 	if len(user) > 0 and len(request.POST.get('email'))<3:
 		return redirect('/')
@@ -29,30 +26,18 @@ def register(request):
 		else:
 			user.user_level = 1;
 		user.save()
-		print "Successful Registration"
-		print user.first_name
-		print user.last_name
-		print user.user_level
-		print user.email
-		print user.password
 		return redirect('/')
 
 def login(request):
-	print "Login"
-	print request.POST.get('email')
-	print request.POST.get('password')
 	user = User.objects.filter(email=request.POST.get('email'))
 	if len(user)<1:
 		print "Failed"
 		return redirect('/')
 	else:
-		print "Success"
 		request.session['user_id'] = user[0].id
-		print "Logging In.."
 		return redirect('/dashboard')
 
 def dashboard(request):
-	print "User Dashboard"
 	if "user_id" in request.session:
 		user = User.objects.get(id=request.session['user_id'])
 		users = User.objects.all().exclude(id=request.session['user_id'])
@@ -65,19 +50,15 @@ def dashboard(request):
 			'users': users
 		}
 		if user.user_level == 9:
-			print "redirecting to admin dashboard"
 			return render(request, 'userdashboard/admindashboard.html', admin_context)
 		else:
-			print "redirecting to regular dashboard"
 			return render(request, 'userdashboard/regdash.html', reg_context)
 	else:
 		del request.session
 		return redirect('/')
 def profile_page(request, user_id):
-	print user_id
 	poke_count = Poke.objects.all().filter(poked=user_id)
 	user = User.objects.get(id=user_id)
-	print user.first_name
 	current_user = User.objects.get(id=request.session['user_id'])
 	messages = Message.objects.all().filter(receiver=user)
 	comments = Comment.objects.all()
@@ -136,12 +117,10 @@ def create(request):
 
 def poke(request, user_id):
 	poke = Poke()
-	print poke.counter
 	poke.poker = User.objects.get(id=request.session['user_id'])
 	poke.poked = User.objects.get(id=user_id)
 	poke.counter = poke.counter+1
 	poke.save()
-	print poke.counter
 	return redirect('/dashboard')
 
 def message(request, user_id):
@@ -153,9 +132,6 @@ def message(request, user_id):
 	message.message = request.POST.get('message')
 	message.created_at = timezone.now()
 	message.save()
-	print message.sender.first_name
-	print message.receiver.first_name
-	print message.message
 	return redirect('/dashboard')
 
 def comment(request):
@@ -167,11 +143,6 @@ def comment(request):
 	comment.comment = request.POST.get('comment')
 	comment.created_at = timezone.now()
 	comment.save()
-	print sending_user.first_name
-	print message
-	print comment.sender
-	print comment.message
-	print comment.comment
 	return redirect('/dashboard')
 
 def update(request, user_id):
@@ -187,6 +158,5 @@ def update(request, user_id):
 		return redirect('/dashboard')
 
 def logout(request):
-	print "Logging Out"
 	del request.session['user_id']
 	return redirect('/')
